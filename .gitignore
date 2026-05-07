@@ -1,17 +1,13 @@
 # COGNIVIEW — .gitignore
 
-# Alert outputs (generated at runtime)
-alerts/*.png
-alerts/*.jpg
+# Alert outputs (tracked as requested)
+# logs/*.csv ignored by default, now removed
 
-# Log files (generated at runtime)
-logs/*.csv
+# Test videos (tracked as requested)
+# data/test_videos/ ignored by default, now removed
 
-# Test videos (too large for git)
-data/test_videos/
-
-# Model weights (downloaded at runtime)
-*.pt
+# Model weights (tracked as requested)
+# *.pt ignored by default, now removed
 
 # Python
 __pycache__/
