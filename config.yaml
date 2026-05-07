@@ -1,0 +1,43 @@
+# ─────────────────────────────────────────────
+# COGNIVIEW Configuration File
+# Edit this file to tune system behaviour.
+# Do NOT hardcode these values in Python files.
+# ─────────────────────────────────────────────
+
+# Video source: 0 for webcam, or file path string
+source: "data/test_videos/ucf_sample.mp4"
+# source: "data/test_videos/scenario_01/single_entry.mp4"
+
+# Display resolution (width x height, pixels)
+resolution:
+  width: 640
+  height: 480
+
+# Enable histogram equalisation for low-light scenes
+preprocessing:
+  equalise_histogram: false
+
+# YOLOv8 model settings
+model:
+  path: "yolov8n.pt"       # Downloads automatically if not found
+  device: "cpu"             # "cpu" or "0" for GPU
+
+# Filtering thresholds (Phase 3)
+filters:
+  confidence_threshold: 0.60
+  frame_threshold: 5
+  cooldown_seconds: 10.0
+
+# Regions of Interest (Phase 2)
+rois:
+  - name: "Zone_A"
+    x1: 150
+    y1: 100
+    x2: 490
+    y2: 380
+
+# Alert output settings (Phase 4)
+alerts:
+  output_dir: "alerts/"
+  log_file: "logs/event_log.csv"
+  console_print: true

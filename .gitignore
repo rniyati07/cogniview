@@ -1,0 +1,38 @@
+# COGNIVIEW — .gitignore
+
+# Alert outputs (generated at runtime)
+alerts/*.png
+alerts/*.jpg
+
+# Log files (generated at runtime)
+logs/*.csv
+
+# Test videos (too large for git)
+data/test_videos/
+
+# Model weights (downloaded at runtime)
+*.pt
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environment
+venv/
+.venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
