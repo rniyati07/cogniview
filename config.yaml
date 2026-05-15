@@ -5,8 +5,11 @@
 # ─────────────────────────────────────────────
 
 # Video source: 0 for webcam, or file path string
-source: "data/test_videos/ucf_sample.mp4"
-# source: "data/test_videos/scenario_01/single_entry.mp4"
+source: 0
+# For local Kaggle dataset testing, comment the above and uncomment one of below:
+# source: "data/kaggle/ucf_crime/Abuse/Abuse001_x264.mp4"               # UCF Crime (Sample Intrusion)
+# source: "data/kaggle/ucf_crime/Abuse/Abuse001_x264.mp4"               # UCF Crime (Sample Baseline)
+
 
 # Display resolution (width x height, pixels)
 resolution:

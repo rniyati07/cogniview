@@ -68,31 +68,44 @@ def draw_detections(frame, detections, intruding_ids=None):
     return frame
 
 
-def draw_rois(frame, rois):
+def draw_rois(frame, rois, intruding_rois=None):
     """
-    Draw ROI boundaries on the frame.
+    Draw ROI boundaries on the frame with transparent fills.
     
     Args:
         frame: BGR frame to draw on.
         rois: List of ROI configurations (dicts).
+        intruding_rois: Set of ROI names currently experiencing intrusion.
         
     Returns:
         Annotated frame.
     """
+    if intruding_rois is None:
+        intruding_rois = set()
+
+    overlay = frame.copy()
+
     for roi in rois:
-        cv2.rectangle(
-            frame, 
-            (roi["x1"], roi["y1"]), 
-            (roi["x2"], roi["y2"]), 
-            COLOR_YELLOW, 
-            BOX_THICKNESS
-        )
+        name = roi["name"]
+        color = COLOR_RED if name in intruding_rois else COLOR_YELLOW
+        
+        x1, y1, x2, y2 = roi["x1"], roi["y1"], roi["x2"], roi["y2"]
+        
+        # Draw transparent fill
+        cv2.rectangle(overlay, (x1, y1), (x2, y2), color, cv2.FILLED)
+        
+        # Draw solid boundary
+        cv2.rectangle(frame, (x1, y1), (x2, y2), color, BOX_THICKNESS)
+        
         # Draw ROI name
         cv2.putText(
-            frame, roi["name"],
-            (roi["x1"] + 5, roi["y1"] + 20),
-            FONT, FONT_SCALE_HUD, COLOR_YELLOW, FONT_THICKNESS
+            frame, name,
+            (x1 + 5, y1 + 20),
+            FONT, FONT_SCALE_HUD, color, FONT_THICKNESS
         )
+        
+    # Apply alpha blending for the fill
+    cv2.addWeighted(overlay, 0.2, frame, 0.8, 0, frame)
         
     return frame
 

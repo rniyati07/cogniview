@@ -32,3 +32,11 @@ env/
 # OS
 .DS_Store
 Thumbs.db
+
+# Analysis Temp Files
+alirakhmaev_files.txt
+ucf101_files.txt
+files.txt
+*.zip
+*.avi
+

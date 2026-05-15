@@ -65,7 +65,9 @@ class FilterManager:
             detections: The full list of detections (x1, y1, x2, y2, conf).
             
         Returns:
-            True if an alert should be fired.
+            tuple: (sustained: bool, should_fire_alert: bool)
+                - sustained: True if the intrusion has met confidence and temporal thresholds (drives red box visual).
+                - should_fire_alert: True if an alert should be logged/saved (drives the AlertSystem).
         """
         # 1. Confidence Filter
         highest_conf = 0.0
@@ -80,8 +82,9 @@ class FilterManager:
         sustained = self.temporal.update(roi_name, is_confident)
 
         # 3. Cooldown Filter
+        should_fire_alert = False
         if sustained and self.cooldown.can_alert(roi_name):
             self.cooldown.record_alert(roi_name)
-            return True
+            should_fire_alert = True
 
-        return False
+        return sustained, should_fire_alert

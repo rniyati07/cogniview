@@ -62,6 +62,11 @@ def parse_args():
         action="store_true",
         help="Enable histogram equalisation (overrides config)."
     )
+    parser.add_argument(
+        "--headless",
+        action="store_true",
+        help="Run without displaying the video window (useful for benchmarks/CI)."
+    )
     return parser.parse_args()
 
 
@@ -159,29 +164,26 @@ def run():
             # Step 3.5: Check intrusions
             intrusions = roi_engine.get_intrusions(detections)
             
-            # Gather all intruding detection IDs
+            # Gather all intruding detection IDs and ROIs
             intruding_ids = set()
+            intruding_rois = set()
             is_intruding = False
             for r_name, box_indices in intrusions.items():
-                if len(box_indices) > 0:
-                    intruding_ids.update(box_indices)
                     
                 # Process through filters
-                confirmed = filter_manager.process(r_name, box_indices, detections)
-                if confirmed:
+                sustained, should_fire_alert = filter_manager.process(r_name, box_indices, detections)
+                if sustained:
                     is_intruding = True
+                    intruding_ids.update(box_indices)
+                    intruding_rois.add(r_name)
                     
+                if should_fire_alert:
                     # Find highest confidence among intruding boxes for this ROI
                     highest_conf = max([detections[i][4] for i in box_indices]) if box_indices else 0.0
                     
-                    # Trigger alert outputs (passing the UNANNOTATED bgr_frame or we can pass a copy)
-                    # For visual context, it's often better to pass a slightly annotated frame, 
-                    # but PRD says "annotated snapshot", so we will draw just for the alert or use the display frame later.
-                    # Wait, we need the annotated frame. Let's draw annotations on a copy specifically for the alert,
-                    # or just use the display_frame we build below. However, the display_frame is built AFTER this step.
-                    # Let's defer alerting until we have the display_frame, or build an alert_frame here.
                     alert_frame = bgr_frame.copy()
-                    alert_frame = draw_rois(alert_frame, rois)
+                    alert_frame = draw_rois(alert_frame, rois, intruding_rois)
+                    # We pass the currently known intruding_ids up to this point for the snapshot
                     alert_frame = draw_detections(alert_frame, detections, intruding_ids)
                     
                     alert_system.trigger(alert_frame, r_name, highest_conf, frame_count)
@@ -196,7 +198,7 @@ def run():
 
             # Step 5: Visualize (draw on a copy of BGR frame)
             display_frame = bgr_frame.copy()
-            display_frame = draw_rois(display_frame, rois)
+            display_frame = draw_rois(display_frame, rois, intruding_rois)
             display_frame = draw_detections(display_frame, detections, intruding_ids)
             
             status_text = "⚠ INTRUSION DETECTED" if is_intruding else "CLEAR"
@@ -208,10 +210,14 @@ def run():
             )
 
             # Step 6: Show frame and check for quit
-            quit_pressed = show_frame(display_frame)
-            if quit_pressed:
-                print("[Main] Quit signal received.")
-                break
+            if not args.headless:
+                quit_pressed = show_frame(display_frame)
+                if quit_pressed:
+                    print("[Main] Quit signal received.")
+                    break
+            
+            if frame_count % 100 == 0:
+                print(f"[Main] Processed {frame_count} frames... (FPS: {fps:.1f})")
 
     except KeyboardInterrupt:
         print("\n[Main] Interrupted by user.")
